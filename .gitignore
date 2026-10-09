@@ -1,0 +1,9 @@
+target/
+.idea/workspace.xml
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.DS_Store
+**/.DS_Store
+*.iml
+*.log
+.env

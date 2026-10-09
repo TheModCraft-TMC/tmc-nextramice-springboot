@@ -7,3 +7,5 @@ target/
 *.iml
 *.log
 .env
+node_modules/
+packages/*/dist/

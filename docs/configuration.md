@@ -1,5 +1,27 @@
 # Configuration and authentication flow
 
+## Select a mode
+
+```yaml
+nextramice:
+  web:
+    mode: resource-server # resource-server | bff | hybrid
+```
+
+- `resource-server` preserves the JWT converter behavior and is the default.
+- `bff` enables server-side browser session infrastructure.
+- `hybrid` enables BFF infrastructure while allowing the application to define
+  a separate bearer-token chain.
+
+The mode controls Nextramice's own endpoints and helpers. It does not remove
+Spring Security's OAuth client classes: an application in `resource-server`
+mode may still configure `oauth2Login` or an `OAuth2AuthorizedClientManager` for
+its own web flows.
+
+Nextramice does not create complete `SecurityFilterChain` beans. In BFF mode,
+apply `NextramiceBffSecurityConfigurer` to the application's chain. Hybrid
+applications must use explicit, non-overlapping security matchers.
+
 ## Request flow
 
 For each request carrying a bearer token:
@@ -97,3 +119,6 @@ adapter for Microsoft Entra ID, Authentik, Google, Keycloak, or Okta.
 
 Consult the identity provider's current official documentation when configuring
 issuer and audience validation.
+
+For OAuth client login and internal sessions, continue with the
+[BFF and local-login guide](bff-and-local-login.md).

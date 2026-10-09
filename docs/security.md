@@ -52,9 +52,13 @@ browser application. If the application also uses cookies, form login, OAuth
 login, or sessions, keep CSRF protection enabled for those routes and design
 separate security chains deliberately.
 
-The current starter is not a BFF and does not manage browser cookies or OAuth
-tokens. A frontend must not place long-lived access or refresh tokens in local
-storage based on anything this starter currently provides.
+In BFF mode, Spring Security stores the authenticated context and authorized
+OAuth client on the server side. A frontend should use the session cookie and
+CSRF endpoint; it must not copy access or refresh tokens into local storage.
+
+Applications still own cookie settings and production session persistence. Set
+cookies to `HttpOnly`, `Secure`, and an appropriate `SameSite` value, and use
+Spring Session with a shared store when sessions must survive instance changes.
 
 ## Production checklist
 

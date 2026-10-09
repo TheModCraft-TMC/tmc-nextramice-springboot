@@ -5,11 +5,14 @@ import net.themodcraft.nextramice.providers.AuthorityProvider;
 import net.themodcraft.nextramice.providers.DefaultAuthorityProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import net.themodcraft.nextramice.configuration.NextramiceProperties;
 
 import java.util.List;
 
 @AutoConfiguration
+@EnableConfigurationProperties(NextramiceProperties.class)
 public class NextramiceAutoConfiguration {
 
     @Bean

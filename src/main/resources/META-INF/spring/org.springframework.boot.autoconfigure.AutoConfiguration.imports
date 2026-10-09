@@ -1,1 +1,3 @@
 net.themodcraft.nextramice.NextramiceAutoConfiguration
+net.themodcraft.nextramice.bff.NextramiceBffAutoConfiguration
+net.themodcraft.nextramice.local.NextramiceLocalLoginAutoConfiguration

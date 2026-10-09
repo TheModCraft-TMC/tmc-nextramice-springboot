@@ -28,6 +28,10 @@ public final class ClaimProxyFactory {
 
                     String name = method.getName();
 
+                    if (name.equals("asMap") && method.getParameterCount() == 0) {
+                        return Map.copyOf(claims);
+                    }
+
 
                     if (name.startsWith("get")) {
                         String key =

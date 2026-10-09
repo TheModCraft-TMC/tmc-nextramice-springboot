@@ -24,6 +24,16 @@ mvn install
 The starter includes the Spring Security resource-server classes used by its
 converter. A consuming application still owns its web security policy.
 
+The starter defaults to:
+
+```yaml
+nextramice:
+  web:
+    mode: resource-server
+```
+
+No BFF or internal-login endpoints are created in this mode.
+
 ## 3. Configure the JWT issuer
 
 For an OpenID Connect provider that exposes discovery metadata:

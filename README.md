@@ -1,8 +1,7 @@
 # Nextramice Spring Boot Starter
 
-Nextramice is a Spring Boot library for converting validated OAuth 2.0 JWTs into
-an application-specific authentication token with authorities and typed,
-extensible claims.
+Nextramice is a Spring Boot security toolkit for JWT resource servers,
+server-side browser sessions, and opt-in application-owned login.
 
 Coordinates:
 
@@ -20,12 +19,14 @@ The public Java namespace is `net.themodcraft.nextramice`.
 
 - [Getting started](docs/getting-started.md)
 - [Configuration and authentication flow](docs/configuration.md)
+- [BFF mode and internal login](docs/bff-and-local-login.md)
+- [Browser client](docs/browser-client.md)
 - [Authorities and additional claims](docs/customization.md)
 - [Typed claim-view generation](docs/typed-claim-views.md)
 - [Security model and production checklist](docs/security.md)
 
-The current release is a Spring Security OAuth 2.0 resource-server extension.
-It is not yet a backend-for-frontend, login server, or identity provider.
+The default mode remains `resource-server`. BFF and local-login behavior is
+disabled until explicitly configured.
 
 ## What it does
 
@@ -34,6 +35,17 @@ When the starter is on the classpath, Spring Boot auto-configures:
 - a `NextramiceOidcAuthenticationConverter`;
 - an empty default `AuthorityProvider` when the application does not provide one;
 - discovery of all application-provided `AuthenticationClaimProvider` beans.
+
+In `bff` or `hybrid` mode, it can additionally provide:
+
+- normalized session, CSRF, and configured-provider endpoints;
+- a reusable Spring Security BFF configurer;
+- OAuth 2.0/OpenID Connect login through Spring Security;
+- internal password login backed by `NextramiceLocalUserService` or
+  `@NextramiceLogin`;
+- opt-in registration backed by `NextramiceRegistrationService` or
+  `@NextramiceRegister`;
+- the framework-neutral `@nextramice/client` TypeScript package.
 
 For each validated `Jwt`, the converter:
 
@@ -46,22 +58,24 @@ For each validated `Jwt`, the converter:
 Providers follow Spring's list ordering. If providers return the same claim key,
 the later provider wins. Null maps and null claim values are ignored.
 
-The included annotation processor can inspect a method marked with
-`@GenerateClaimView`. It finds two-argument `put` calls and generates typed
-getter methods on `GeneratedAdditionalClaims` based on each key and value type.
+The included compiler-neutral annotation processor reads explicit claim
+definitions from `@GenerateClaimView` and generates a typed interface in the
+annotated method's package.
 
 ## What it does not do
 
 Nextramice does not:
 
 - configure a `SecurityFilterChain`;
-- configure or contact an OAuth/OIDC identity provider;
+- configure identity-provider client registrations or secrets;
 - create a `JwtDecoder` or validate signatures, issuers, or audiences;
-- fetch users, roles, or claims from a database;
+- provide a user database, registration persistence, or verification workflow;
+- provide the planned React/Next.js, Angular, and Vue adapters yet;
 - make authorization decisions for application endpoints.
 
-Those responsibilities stay in the consuming application. The converter only
-runs after Spring Security has decoded and validated the JWT.
+Those responsibilities stay in the consuming application. Nextramice provides
+configurers and adapters without silently replacing the application's security
+policy.
 
 ## Connect it to Spring Security
 
@@ -129,7 +143,13 @@ The values are available through
 Mark a method containing the claim-map population logic:
 
 ```java
-@GenerateClaimView
+@GenerateClaimView(
+        name = "TenantClaims",
+        claims = {
+                @ClaimDefinition(name = "tenantId", type = String.class),
+                @ClaimDefinition(name = "displayName", type = String.class)
+        }
+)
 Map<String, Object> provideClaims(Jwt jwt) {
     Map<String, Object> claims = new HashMap<>();
     claims.put("tenantId", jwt.getClaimAsString("tenant_id"));
@@ -138,13 +158,19 @@ Map<String, Object> provideClaims(Jwt jwt) {
 }
 ```
 
-The processor generates getters similar to:
+The processor generates:
 
 ```java
-public interface GeneratedAdditionalClaims extends AdditionalClaims {
+public interface TenantClaims extends AdditionalClaims {
     String getTenantId();
     String getDisplayName();
 }
+```
+
+Read the view from the token:
+
+```java
+TenantClaims claims = authentication.getClaims(TenantClaims.class);
 ```
 
 On Java 23 and newer, annotation processors must be enabled explicitly. Add the
@@ -167,7 +193,9 @@ starter to the consumer's Maven compiler processor path:
 </plugin>
 ```
 
-The processor uses the javac tree API and this project currently targets Java 25.
+The processor uses only standard annotation-processing APIs. The project itself
+is compiled and tested with Eclipse ECJ while remaining compatible with javac
+consumers.
 
 ## Build
 

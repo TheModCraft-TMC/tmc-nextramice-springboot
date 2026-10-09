@@ -1,15 +1,22 @@
 # Typed claim-view generation
 
-Nextramice contains an experimental annotation processor that scans a method
-marked with `@GenerateClaimView`. It finds two-argument `put` calls and generates
-getter declarations in `GeneratedAdditionalClaims`.
+Nextramice contains an annotation processor that generates a typed claim-view
+interface from explicit `@GenerateClaimView` metadata. It uses standard
+annotation-processing APIs and is tested with Eclipse ECJ; it does not inspect
+compiler-specific method-body syntax.
 
 ## Example
 
 ```java
 import net.themodcraft.nextramice.interfaces.GenerateClaimView;
 
-@GenerateClaimView
+@GenerateClaimView(
+        name = "TenantClaims",
+        claims = {
+                @ClaimDefinition(name = "tenantId", type = String.class),
+                @ClaimDefinition(name = "displayName", type = String.class)
+        }
+)
 Map<String, Object> provideClaims(Jwt jwt) {
     Map<String, Object> claims = new HashMap<>();
     claims.put("tenantId", jwt.getClaimAsString("tenant_id"));
@@ -21,9 +28,9 @@ Map<String, Object> provideClaims(Jwt jwt) {
 The intended generated shape is:
 
 ```java
-package net.themodcraft.nextramice.interfaces;
+package example.security;
 
-public interface GeneratedAdditionalClaims extends AdditionalClaims {
+public interface TenantClaims extends AdditionalClaims {
     String getTenantId();
     String getDisplayName();
 }
@@ -31,6 +38,11 @@ public interface GeneratedAdditionalClaims extends AdditionalClaims {
 
 At runtime, the claim proxy translates `getTenantId()` to the `tenantId` map key.
 Only JavaBean-style methods beginning with `get` are supported.
+
+```java
+TenantClaims claims = authentication.getClaims(TenantClaims.class);
+String tenantId = claims.getTenantId();
+```
 
 ## Maven compiler setup
 
@@ -56,16 +68,25 @@ the starter to the consuming project's processor path:
 
 Generated sources normally appear below `target/generated-sources/annotations`.
 
+## Eclipse ECJ
+
+Nextramice's normal Maven build uses the Eclipse compiler through
+`plexus-compiler-eclipse`. Consumers do not have to use ECJ: the generated-view
+processor uses only `javax.annotation.processing` and `javax.lang.model` APIs and
+works with compatible ECJ and javac builds.
+
+For a Maven 3 consumer that also wants ECJ, configure the compiler plugin with
+`compilerId` set to `eclipse` and add `plexus-compiler-eclipse` as a plugin
+dependency. The Nextramice build itself is the maintained reference setup.
+
 ## Current limitations
 
 - The processor targets Java 25.
-- It uses the javac tree API and is therefore tied to javac-compatible builds.
-- Claim keys must come from source expressions the scanner can interpret.
-- Type inference is intentionally limited.
-- Multiple annotated methods may attempt to generate the same interface.
+- Claim names must be valid lower-camel-case Java property names.
+- Types must be expressible as class literals.
+- Two annotated methods cannot generate the same fully qualified interface.
 - Renaming a map key changes its generated method and is an API change for code
   that calls the getter.
 
-Treat this feature as experimental until these cases have explicit compiler
-tests and a stable generation contract. Plain `AuthenticationClaimProvider`
-implementations remain usable without annotation processing.
+Plain `AuthenticationClaimProvider` implementations remain usable without
+annotation processing.

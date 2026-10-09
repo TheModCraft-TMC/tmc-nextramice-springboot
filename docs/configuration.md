@@ -20,7 +20,46 @@ its own web flows.
 
 Nextramice does not create complete `SecurityFilterChain` beans. In BFF mode,
 apply `NextramiceBffSecurityConfigurer` to the application's chain. Hybrid
-applications must use explicit, non-overlapping security matchers.
+applications must use explicit, non-overlapping security matchers. Nextramice
+validates those matchers at startup and scopes the configured BFF chain to the
+BFF matcher, Nextramice endpoints, and OAuth callback endpoints.
+
+## Harden the browser session
+
+```yaml
+nextramice:
+  bff:
+    base-path: /nextramice
+    post-login-redirect: /
+    post-logout-redirect: /
+    provider-logout: false
+    refresh-skew: 1m
+    allowed-origins:
+      - https://app.example.test
+    exposed-claims:
+      - tenantId
+    session:
+      idle-timeout: 30m
+      absolute-timeout: 8h
+      cookie:
+        name: NEXTRAMICE_SESSION
+        path: /
+        http-only: true
+        secure: true
+        same-site: lax
+```
+
+Redirect properties accept local absolute paths only. Cross-origin BFF calls
+are credentialed and allowed only for the exact configured origins. The
+configuration rejects `SameSite=None` unless the cookie is secure.
+
+The idle timeout is applied to the servlet session. An additional filter
+enforces the absolute lifetime even while the session remains active. For local
+HTTP development, explicitly set `secure: false`; production defaults are
+secure.
+
+Only names in `exposed-claims` are copied into browser session responses. The
+raw provider token and unrestricted provider attributes are never returned.
 
 ## Request flow
 

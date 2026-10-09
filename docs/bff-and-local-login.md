@@ -54,7 +54,17 @@ class SecurityConfiguration {
 
 The configurer keeps session creation on demand, permits the authentication
 contract endpoints, configures logout, and enables `oauth2Login` when client
-registrations exist. It does not disable CSRF.
+registrations exist. It does not disable CSRF. Local logout returns `204`; when
+`nextramice.bff.provider-logout=true`, it uses Spring Security's OIDC
+RP-initiated logout handler and redirects to the validated local
+`post-logout-redirect`.
+
+When application code needs a provider access token, inject
+`NextramiceAuthorizedClientService`. It uses Spring's authorized-client
+repository, refreshes within the configured skew, and serializes refreshes per
+browser session and client registration. Configure Spring Session JDBC or Redis
+in the consuming application when authorized clients and sessions must survive
+instance replacement.
 
 ## Configure an OIDC provider
 
@@ -138,6 +148,45 @@ X-CSRF-TOKEN: ...
 Successful login rotates the session identifier, saves the security context,
 and returns the normalized session. Failures use a generic `401` response.
 
+### Login hardening hooks
+
+Applications can provide the following beans without replacing the login
+controller:
+
+- `NextramiceLoginAttemptPolicy` implements rate limiting, abuse detection, and
+  success/failure counters;
+- `NextramiceAccountStatusPolicy` adds application-specific lock, tenant, or
+  eligibility checks after Spring's standard enabled/locked checks;
+- `NextramicePasswordUpgradeService` persists a newly encoded adaptive hash
+  when Spring's `PasswordEncoder` requests an upgrade;
+- `NextramiceAuthenticationCompletionPolicy` enforces completed MFA or step-up
+  state after password verification and before session creation.
+- `NextramiceAccountLinkService` can map a validated external `(issuer,
+  subject)` pair to an application-owned user ID. It is never called with email
+  as an identity key.
+
+For example, an MFA gate can reject primary authentication without creating a
+session:
+
+```java
+@Bean
+NextramiceAuthenticationCompletionPolicy requireMfa(MfaChallenges challenges) {
+    return (authentication, request) -> {
+        if (!challenges.isComplete(authentication.getName(), request)) {
+            throw new InsufficientAuthenticationException("Additional authentication required");
+        }
+    };
+}
+```
+
+The application owns the challenge protocol (TOTP, WebAuthn, recovery code, or
+another mechanism). Nextramice guarantees that completion policies run before
+session rotation and security-context persistence.
+
+Every attempt also publishes a `NextramiceLoginSucceededEvent` or
+`NextramiceLoginFailedEvent`. Failure events contain only the exception type,
+never the submitted password or exception message.
+
 ## Enable registration
 
 Registration is disabled separately:
@@ -166,8 +215,8 @@ public NextramiceRegistrationResult register(
 ```
 
 The application owns duplicate-account handling, password policy, password
-encoding, persistence, verification, consent, rate limiting, CAPTCHA, and audit
-events. Nextramice does not automatically log in a newly registered user.
+encoding, persistence, verification, consent, registration abuse controls, and
+CAPTCHA. Nextramice does not automatically log in a newly registered user.
 
 ## Hybrid mode
 
@@ -182,10 +231,11 @@ nextramice:
     resource-server-matcher: /api/**
 ```
 
-The current snapshot exposes these matcher properties but does not generate the
-two chains. Define two ordered `SecurityFilterChain` beans and apply the BFF
-configurer only to the browser chain. Matcher-overlap validation is planned but
-not implemented yet.
+Define two ordered `SecurityFilterChain` beans and apply the BFF configurer only
+to the browser chain. The configurer scopes that chain to the BFF and OAuth
+paths. Startup fails when the configured BFF and resource-server patterns
+overlap. The consuming application remains responsible for the separate bearer
+chain because it owns JWT issuer, decoder, and API authorization policy.
 
 ## Current limitations
 
@@ -193,9 +243,11 @@ not implemented yet.
   `tmc-nextramice-nodePackages` project.
 - Session storage uses the consuming application's Spring Security/Spring
   Session configuration.
-- OAuth token refresh and provider logout behavior are currently delegated to
-  Spring Security defaults.
-- Session claims for OAuth login are intentionally empty until an explicit
-  allowlist/mapper API is added.
-- Rate limiting, account lock policy, MFA, password reset, and verification
-  delivery remain application responsibilities.
+- Provider tokens are refreshed on demand through
+  `NextramiceAuthorizedClientService`; applications should use that service for
+  outbound provider calls.
+- Provider-specific claim and logout profiles are planned as separate optional
+  dependencies. The core starter remains standards-based.
+- Nextramice supplies login hardening hooks, while the application supplies the
+  actual rate-limit store, MFA protocol, password-reset flow, and verification
+  delivery.

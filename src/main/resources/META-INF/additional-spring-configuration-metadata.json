@@ -1,0 +1,98 @@
+{
+  "groups": [
+    {
+      "name": "nextramice.bff",
+      "type": "net.themodcraft.nextramice.configuration.NextramiceProperties$Bff",
+      "description": "Backend-for-frontend security and browser session settings."
+    },
+    {
+      "name": "nextramice.bff.session",
+      "type": "net.themodcraft.nextramice.configuration.NextramiceProperties$Bff$Session",
+      "description": "Browser session lifetime settings."
+    },
+    {
+      "name": "nextramice.bff.session.cookie",
+      "type": "net.themodcraft.nextramice.configuration.NextramiceProperties$Bff$Cookie",
+      "description": "Browser session cookie settings."
+    }
+  ],
+  "properties": [
+    {
+      "name": "nextramice.bff.base-path",
+      "type": "java.lang.String",
+      "defaultValue": "/nextramice",
+      "description": "Base path for browser authentication endpoints."
+    },
+    {
+      "name": "nextramice.bff.post-login-redirect",
+      "type": "java.lang.String",
+      "defaultValue": "/",
+      "description": "Validated local path used after OAuth login."
+    },
+    {
+      "name": "nextramice.bff.post-logout-redirect",
+      "type": "java.lang.String",
+      "defaultValue": "/",
+      "description": "Validated local path used after provider logout."
+    },
+    {
+      "name": "nextramice.bff.provider-logout",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Use OIDC RP-initiated logout when supported by the configured provider."
+    },
+    {
+      "name": "nextramice.bff.refresh-skew",
+      "type": "java.time.Duration",
+      "defaultValue": "1m",
+      "description": "Refresh an authorized client this long before token expiry."
+    },
+    {
+      "name": "nextramice.bff.allowed-origins",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Exact HTTPS origins allowed to make credentialed BFF requests."
+    },
+    {
+      "name": "nextramice.bff.exposed-claims",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "Claim names allowed in the browser-visible session response."
+    },
+    {
+      "name": "nextramice.bff.session.idle-timeout",
+      "type": "java.time.Duration",
+      "defaultValue": "30m",
+      "description": "Maximum inactivity period for a browser session."
+    },
+    {
+      "name": "nextramice.bff.session.absolute-timeout",
+      "type": "java.time.Duration",
+      "defaultValue": "8h",
+      "description": "Maximum browser session age regardless of activity."
+    },
+    {
+      "name": "nextramice.bff.session.cookie.name",
+      "type": "java.lang.String",
+      "defaultValue": "NEXTRAMICE_SESSION"
+    },
+    {
+      "name": "nextramice.bff.session.cookie.path",
+      "type": "java.lang.String",
+      "defaultValue": "/"
+    },
+    {
+      "name": "nextramice.bff.session.cookie.http-only",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
+    },
+    {
+      "name": "nextramice.bff.session.cookie.secure",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
+    },
+    {
+      "name": "nextramice.bff.session.cookie.same-site",
+      "type": "net.themodcraft.nextramice.configuration.NextramiceProperties$Bff$SameSite",
+      "defaultValue": "lax"
+    }
+  ]
+}

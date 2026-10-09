@@ -9,7 +9,7 @@ Coordinates:
 <dependency>
     <groupId>net.themodcraft</groupId>
     <artifactId>nextramice-spring-boot-starter</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -40,9 +40,14 @@ In `bff` or `hybrid` mode, it can additionally provide:
 
 - normalized session, CSRF, and configured-provider endpoints;
 - a reusable Spring Security BFF configurer;
+- secure session-cookie defaults, idle/absolute lifetime enforcement, exact
+  CORS origins, safe local redirects, and claim allowlisting;
 - OAuth 2.0/OpenID Connect login through Spring Security;
+- synchronized authorized-client refresh and optional OIDC provider logout;
 - internal password login backed by `NextramiceLocalUserService` or
   `@NextramiceLogin`;
+- replaceable attempt/rate-limit, account-status, password-upgrade, audit-event,
+  and MFA-completion hooks;
 - opt-in registration backed by `NextramiceRegistrationService` or
   `@NextramiceRegister`;
 - compatibility with the separately maintained Nextramice frontend packages.
@@ -186,7 +191,7 @@ starter to the consumer's Maven compiler processor path:
             <path>
                 <groupId>net.themodcraft</groupId>
                 <artifactId>nextramice-spring-boot-starter</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>0.1.0</version>
             </path>
         </annotationProcessorPaths>
     </configuration>
@@ -202,3 +207,12 @@ consumers.
 ```bash
 mvn verify
 ```
+
+## License
+
+Nextramice is source-available under the
+[Nextramice Source-Available License 1.0](LICENSE). Commercial applications and
+services may use and modify it, including with AI-assisted development tools.
+Selling or reselling Nextramice itself, or a substantially similar modified
+version, is prohibited. Using the software to train or fine-tune an AI model is
+also prohibited.

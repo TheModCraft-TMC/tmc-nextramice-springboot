@@ -56,9 +56,10 @@ In BFF mode, Spring Security stores the authenticated context and authorized
 OAuth client on the server side. A frontend should use the session cookie and
 CSRF endpoint; it must not copy access or refresh tokens into local storage.
 
-Applications still own cookie settings and production session persistence. Set
-cookies to `HttpOnly`, `Secure`, and an appropriate `SameSite` value, and use
-Spring Session with a shared store when sessions must survive instance changes.
+Nextramice BFF mode configures an `HttpOnly`, `Secure`, `SameSite=Lax` session
+cookie by default and enforces idle and absolute lifetimes. Applications still
+own production session persistence; use Spring Session with a shared JDBC or
+Redis store when sessions must survive instance changes.
 
 ## Production checklist
 

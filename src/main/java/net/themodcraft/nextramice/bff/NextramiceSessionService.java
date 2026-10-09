@@ -4,6 +4,7 @@ import net.themodcraft.nextramice.NextramiceJwtAuthenticationToken;
 import net.themodcraft.nextramice.bff.model.NextramicePrincipal;
 import net.themodcraft.nextramice.bff.model.NextramiceSession;
 import net.themodcraft.nextramice.local.NextramiceLocalUser;
+import net.themodcraft.nextramice.configuration.NextramiceProperties;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,9 +13,36 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.net.URL;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class NextramiceSessionService {
+
+    private final Set<String> exposedClaims;
+    private final NextramiceAccountLinkService accountLinks;
+
+    public NextramiceSessionService() {
+        this.exposedClaims = null;
+        this.accountLinks = null;
+    }
+
+    public NextramiceSessionService(NextramiceProperties properties) {
+        this(properties, null);
+    }
+
+    public NextramiceSessionService(Set<String> exposedClaims) {
+        this.exposedClaims = Set.copyOf(exposedClaims);
+        this.accountLinks = null;
+    }
+
+    public NextramiceSessionService(
+            NextramiceProperties properties,
+            NextramiceAccountLinkService accountLinks
+    ) {
+        this.exposedClaims = Set.copyOf(properties.getBff().getExposedClaims());
+        this.accountLinks = accountLinks;
+    }
 
     public NextramiceSession create(Authentication authentication) {
         if (authentication == null
@@ -33,7 +61,7 @@ public class NextramiceSessionService {
             URL issuer = token.getToken().getIssuer();
             String id = externalId(issuer == null ? null : issuer.toString(), subject, token.getName());
             String displayName = token.getToken().getClaimAsString("name");
-            Map<String, Object> claims = token.getClaims().asMap();
+            Map<String, Object> claims = allowlisted(token.getClaims().asMap());
             return new NextramiceSession(
                     true,
                     new NextramicePrincipal(id, token.getName(), displayName),
@@ -62,7 +90,7 @@ public class NextramiceSessionService {
                             stringAttribute(user, "name")
                     ),
                     authorities,
-                    Map.of(),
+                    allowlisted(user.getAttributes()),
                     null,
                     "oidc",
                     token.getAuthorizedClientRegistrationId()
@@ -97,8 +125,14 @@ public class NextramiceSessionService {
         return value instanceof String text && !text.isBlank() ? text : null;
     }
 
-    private static String externalId(String issuer, String subject, String fallback) {
+    private String externalId(String issuer, String subject, String fallback) {
         if (issuer != null && !issuer.isBlank() && subject != null && !subject.isBlank()) {
+            if (accountLinks != null) {
+                String linked = accountLinks.findLocalUserId(issuer, subject).orElse(null);
+                if (linked != null && !linked.isBlank()) {
+                    return linked;
+                }
+            }
             return issuer + "|" + subject;
         }
         return subject != null && !subject.isBlank() ? subject : fallback;
@@ -111,5 +145,17 @@ public class NextramiceSessionService {
             }
         }
         return null;
+    }
+
+    private Map<String, Object> allowlisted(Map<String, Object> available) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        Set<String> names = exposedClaims == null ? available.keySet() : exposedClaims;
+        for (String name : names) {
+            Object value = available.get(name);
+            if (value != null) {
+                result.put(name, value);
+            }
+        }
+        return Map.copyOf(result);
     }
 }

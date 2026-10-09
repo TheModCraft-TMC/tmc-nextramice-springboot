@@ -5,6 +5,7 @@ import net.themodcraft.nextramice.bff.model.NextramiceSession;
 import net.themodcraft.nextramice.factories.ClaimProxyFactory;
 import net.themodcraft.nextramice.interfaces.GeneratedAdditionalClaims;
 import net.themodcraft.nextramice.local.NextramiceLocalUser;
+import net.themodcraft.nextramice.configuration.NextramiceProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,5 +81,60 @@ class NextramiceSessionServiceTest {
         assertThat(session.principal().username()).isEqualTo("mouse@example.test");
         assertThat(session.loginMethod()).isEqualTo("local");
         assertThat(session.provider()).isEqualTo("local");
+    }
+
+    @Test
+    void exposesOnlyConfiguredClaimsInProductionConfiguration() {
+        NextramiceProperties properties = new NextramiceProperties();
+        properties.getBff().getExposedClaims().add("tenantId");
+        NextramiceSessionService configuredSessions = new NextramiceSessionService(properties);
+        Jwt jwt = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .subject("external-123")
+                .claim("email", "mouse@example.test")
+                .build();
+        GeneratedAdditionalClaims claims = ClaimProxyFactory.create(
+                GeneratedAdditionalClaims.class,
+                Map.of("tenantId", "mice", "internalSecret", "hidden")
+        );
+        NextramiceJwtAuthenticationToken authentication = new NextramiceJwtAuthenticationToken(
+                jwt,
+                List.of(),
+                claims,
+                "mouse@example.test"
+        );
+
+        assertThat(configuredSessions.create(authentication).claims())
+                .containsExactly(Map.entry("tenantId", "mice"));
+    }
+
+    @Test
+    void linksExternalAccountsOnlyByIssuerAndSubject() {
+        NextramiceProperties properties = new NextramiceProperties();
+        NextramiceSessionService linkedSessions = new NextramiceSessionService(
+                properties,
+                (issuer, subject) -> issuer.equals("https://issuer.example.test")
+                        && subject.equals("external-123")
+                        ? Optional.of("local-42")
+                        : Optional.empty()
+        );
+        Jwt jwt = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .subject("external-123")
+                .issuer("https://issuer.example.test")
+                .claim("email", "mouse@example.test")
+                .build();
+        GeneratedAdditionalClaims noClaims = ClaimProxyFactory.create(
+                GeneratedAdditionalClaims.class,
+                Map.of()
+        );
+        NextramiceJwtAuthenticationToken authentication = new NextramiceJwtAuthenticationToken(
+                jwt,
+                List.of(),
+                noClaims,
+                "mouse@example.test"
+        );
+
+        assertThat(linkedSessions.create(authentication).principal().id()).isEqualTo("local-42");
     }
 }

@@ -1,0 +1,60 @@
+Nextramice Source-Available License 1.0
+
+Copyright (c) 2026 TheModCraft
+
+1. Permission
+
+Subject to the terms of this license, TheModCraft grants you a worldwide,
+royalty-free, non-exclusive, non-transferable license to use, copy, modify,
+merge, publish, and distribute the Nextramice software and its documentation
+(the "Software"). You may use the Software as a component of commercial
+applications and services, and you may charge for those applications and
+services.
+
+2. No sale or resale of the Software
+
+You may not sell, resell, rent, lease, or license for a fee the Software itself,
+whether in source or binary form. This restriction also applies to a modified
+version or derivative work whose primary value is substantially the same as the
+Software. It does not prohibit charging for a larger application or service in
+which the Software is only a component and is not offered as a standalone
+product.
+
+3. No AI training
+
+You may not use, reproduce, collect, provide, or make available the Software,
+including its source code, binaries, documentation, or modified versions, for
+the purpose of training, fine-tuning, or retraining an artificial-intelligence
+or machine-learning model, or for creating a dataset intended for any such
+purpose.
+
+Using an AI-assisted development tool to inspect, explain, test, debug, or edit
+the Software is permitted, provided that use is for development assistance and
+does not train, fine-tune, or retrain a model on the Software.
+
+4. Notices
+
+You must include this license and the copyright notice in every copy or
+substantial portion of the Software that you distribute. You may not remove or
+alter notices identifying TheModCraft as the copyright holder.
+
+5. No trademark license
+
+This license does not grant permission to use the names, trademarks, service
+marks, or logos of TheModCraft or Nextramice except as reasonably necessary to
+identify the origin of the Software.
+
+6. Termination
+
+Your rights under this license terminate automatically if you violate any of
+its terms. If you cure the violation within 30 days after becoming aware of it,
+your rights are reinstated automatically for that first violation.
+
+7. Disclaimer of warranty and limitation of liability
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. TO THE MAXIMUM EXTENT
+PERMITTED BY LAW, THE COPYRIGHT HOLDER SHALL NOT BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR
+OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.

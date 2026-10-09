@@ -16,6 +16,17 @@ Coordinates:
 
 The public Java namespace is `net.themodcraft.nextramice`.
 
+## Documentation
+
+- [Getting started](docs/getting-started.md)
+- [Configuration and authentication flow](docs/configuration.md)
+- [Authorities and additional claims](docs/customization.md)
+- [Typed claim-view generation](docs/typed-claim-views.md)
+- [Security model and production checklist](docs/security.md)
+
+The current release is a Spring Security OAuth 2.0 resource-server extension.
+It is not yet a backend-for-frontend, login server, or identity provider.
+
 ## What it does
 
 When the starter is on the classpath, Spring Boot auto-configures:

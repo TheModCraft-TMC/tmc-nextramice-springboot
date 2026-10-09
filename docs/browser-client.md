@@ -1,23 +1,24 @@
 # Browser client
 
-`@nextramice/client` is the framework-neutral TypeScript client for the BFF HTTP
-contract. It always sends browser credentials and automatically obtains and
-applies a CSRF token before unsafe requests.
+The Nextramice frontend workspace is maintained separately in
+`tmc-nextramice-nodePackages`. It contains `@nextramice/core` plus Angular,
+React, Next.js, and Vue packages. The shared client sends browser credentials
+and automatically obtains and applies a CSRF token before unsafe requests.
 
-The package currently lives in this repository and is not published to npm.
+The packages are not published to npm yet.
 
 ## Build
 
 ```bash
+# From the tmc-nextramice-nodePackages repository root:
 npm install
-npm run build
 npm test
 ```
 
 ## Create a client
 
 ```ts
-import { NextramiceClient } from "@nextramice/client";
+import { NextramiceClient } from "@nextramice/core";
 
 const auth = new NextramiceClient({
   baseUrl: "/nextramice",
@@ -106,6 +107,7 @@ const auth = new NextramiceClient({
 });
 ```
 
-The client throws `NextramiceHttpError` for non-success responses. The error
-contains the HTTP status and parsed response body but never stores submitted
-credentials.
+The core client throws `NextramiceHttpError` for non-success responses. The
+error contains the HTTP status and parsed response body but never stores
+submitted credentials. Framework-specific store and hook examples live in the
+frontend workspace README.

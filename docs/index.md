@@ -29,11 +29,11 @@ The current starter provides:
 - a Spring Security BFF configurer;
 - internal password authentication with session-fixation protection;
 - typed services or annotations for application-owned login and registration.
-- a framework-neutral TypeScript client with credentials and CSRF handling.
+- a stable HTTP contract for the separately maintained frontend packages.
 
-The React/Next.js, Angular, and Vue adapters are not implemented yet. The current
-BFF and TypeScript client support is the first vertical slice and should be
-treated as snapshot functionality while its HTTP contract is stabilized.
+The core, Angular, React, Next.js, and Vue packages are developed in the separate
+`tmc-nextramice-nodePackages` project. This repository owns the Spring backend
+and its HTTP contract.
 
 ## Requirements
 

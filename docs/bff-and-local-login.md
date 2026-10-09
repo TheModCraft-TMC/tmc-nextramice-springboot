@@ -189,8 +189,8 @@ not implemented yet.
 
 ## Current limitations
 
-- The framework-neutral TypeScript client is included, but React/Next.js,
-  Angular, and Vue adapters are not yet included.
+- Frontend clients and stores are maintained in the separate
+  `tmc-nextramice-nodePackages` project.
 - Session storage uses the consuming application's Spring Security/Spring
   Session configuration.
 - OAuth token refresh and provider logout behavior are currently delegated to

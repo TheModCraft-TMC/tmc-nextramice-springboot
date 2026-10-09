@@ -45,7 +45,7 @@ In `bff` or `hybrid` mode, it can additionally provide:
   `@NextramiceLogin`;
 - opt-in registration backed by `NextramiceRegistrationService` or
   `@NextramiceRegister`;
-- the framework-neutral `@nextramice/client` TypeScript package.
+- compatibility with the separately maintained Nextramice frontend packages.
 
 For each validated `Jwt`, the converter:
 
@@ -70,7 +70,7 @@ Nextramice does not:
 - configure identity-provider client registrations or secrets;
 - create a `JwtDecoder` or validate signatures, issuers, or audiences;
 - provide a user database, registration persistence, or verification workflow;
-- provide the planned React/Next.js, Angular, and Vue adapters yet;
+- publish or version the separately maintained frontend packages;
 - make authorization decisions for application endpoints.
 
 Those responsibilities stay in the consuming application. Nextramice provides
